@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>UCL Knockout Predictor</title>
+
+<style>
+
+body{
+    font-family:system-ui;
+    background:#0f172a;
+    color:white;
+    padding:20px;
+}
+
+h1{
+    text-align:center;
+    margin-bottom:40px;
+}
+
+.bracket{
+    display:flex;
+    gap:50px;
+    justify-content:center;
+    align-items:flex-start;
+}
+
+.round{
+    display:flex;
+    flex-direction:column;
+    gap:25px;
+}
+
+.round h2{
+    text-align:center;
+}
+
+.match{
+    background:#1e293b;
+    padding:10px;
+    border-radius:8px;
+    width:180px;
+}
+
+.team{
+    padding:8px;
+    border-radius:6px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.team:hover{
+    background:#334155;
+}
+
+.winner{
+    background:#22c55e;
+    color:black;
+    font-weight:bold;
+}
+
+button{
+    display:block;
+    margin:40px auto;
+    padding:10px 20px;
+    border:none;
+    border-radius:8px;
+    background:#ef4444;
+    color:white;
+    cursor:pointer;
+}
+
+#champion{
+    text-align:center;
+    font-size:20px;
+    margin-top:10px;
+    font-weight:bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>⚽ UCL 2026 Bracket Predictor</h1>
+
+<div class="bracket">
+
+<!-- ROUND OF 16 -->
+
+<div class="round" id="r16">
+<h2>Round of 16</h2>
+
+<div class="match"><div class="team">Galatasaray</div><div class="team">Liverpool</div></div>
+<div class="match"><div class="team">Atalanta</div><div class="team">Bayern</div></div>
+<div class="match"><div class="team">Atletico</div><div class="team">Tottenham</div></div>
+<div class="match"><div class="team">Newcastle</div><div class="team">Barcelona</div></div>
+<div class="match"><div class="team">Leverkusen</div><div class="team">Arsenal</div></div>
+<div class="match"><div class="team">Bodo</div><div class="team">Sporting</div></div>
+<div class="match"><div class="team">PSG</div><div class="team">Chelsea</div></div>
+<div class="match"><div class="team">Real Madrid</div><div class="team">Man City</div></div>
+
+</div>
+
+
+<!-- QUARTERS -->
+
+<div class="round" id="qf">
+<h2>Quarterfinals</h2>
+
+<div class="match"><div class="team">TBD</div><div class="team">TBD</div></div>
+<div class="match"><div class="team">TBD</div><div class="team">TBD</div></div>
+<div class="match"><div class="team">TBD</div><div class="team">TBD</div></div>
+<div class="match"><div class="team">TBD</div><div class="team">TBD</div></div>
+
+</div>
+
+
+<!-- SEMIS -->
+
+<div class="round" id="sf">
+<h2>Semifinals</h2>
+
+<div class="match"><div class="team">TBD</div><div class="team">TBD</div></div>
+<div class="match"><div class="team">TBD</div><div class="team">TBD</div></div>
+
+</div>
+
+
+<!-- FINAL -->
+
+<div class="round" id="final">
+<h2>Final</h2>
+
+<div class="match"><div class="team">TBD</div><div class="team">TBD</div></div>
+
+<h2>Champion</h2>
+<div id="champion">TBD</div>
+
+</div>
+
+</div>
+
+
+<button onclick="resetBracket()">Reset</button>
+
+
+<script>
+
+const rounds = {
+    r16: document.querySelectorAll("#r16 .match"),
+    qf: document.querySelectorAll("#qf .match"),
+    sf: document.querySelectorAll("#sf .match"),
+    final: document.querySelector("#final .match")
+}
+
+function handleClick(match, teamIndex, roundName, matchIndex){
+
+    const teams = match.querySelectorAll(".team")
+
+    teams.forEach(t=>t.classList.remove("winner"))
+    teams[teamIndex].classList.add("winner")
+
+    const winner = teams[teamIndex].innerText
+
+    if(roundName === "r16"){
+        const qfMatch = Math.floor(matchIndex/2)
+        const slot = matchIndex%2
+        rounds.qf[qfMatch].children[slot].innerText = winner
+    }
+
+    if(roundName === "qf"){
+        const sfMatch = Math.floor(matchIndex/2)
+        const slot = matchIndex%2
+        rounds.sf[sfMatch].children[slot].innerText = winner
+    }
+
+    if(roundName === "sf"){
+        rounds.final.children[matchIndex].innerText = winner
+    }
+
+    if(roundName === "final"){
+        document.getElementById("champion").innerText = winner
+    }
+
+    save()
+}
+
+function attachListeners(){
+
+    Object.keys(rounds).forEach(roundName=>{
+
+        const matches = roundName === "final"
+            ? [rounds.final]
+            : rounds[roundName]
+
+        matches.forEach((match, matchIndex)=>{
+
+            const teams = match.querySelectorAll(".team")
+
+            teams.forEach((team, teamIndex)=>{
+                team.onclick = ()=>handleClick(match, teamIndex, roundName, matchIndex)
+            })
+
+        })
+
+    })
+
+}
+
+function save(){
+
+    const data = []
+
+    document.querySelectorAll(".match").forEach(match=>{
+        const winner = match.querySelector(".winner")
+        data.push(winner ? winner.innerText : null)
+    })
+
+    localStorage.setItem("uclBracket", JSON.stringify(data))
+}
+
+function resetBracket(){
+    localStorage.removeItem("uclBracket")
+    location.reload()
+}
+
+attachListeners()
+
+</script>
+
+</body>
+</html>
